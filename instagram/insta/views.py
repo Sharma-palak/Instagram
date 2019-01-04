@@ -2,7 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.views import APIView
-from .serializers import LoginSerializer
+from rest_framework.generics import CreateAPIView
+#from .serializers import LoginSerializer
+from .serializers import UserSerializer1
 from django.contrib.auth import login as django_login,logout as django_logout
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -11,8 +13,9 @@ from rest_framework import generics,permissions
 from .import models
 from .import serializers
 from django.contrib.auth.models import User
-
-
+from django.contrib.auth import get_user_model
+User=get_user_model()
+'''
 class LoginView(APIView):
     def post(self,request):
         serializer=LoginSerializer(data=request.data)
@@ -20,7 +23,7 @@ class LoginView(APIView):
         user=serializer.validated_data["user"]
         django_login(request,user)
         #token,created=Token.objects.get_or_create(user=user)
-        return Response({"token":token.key},status=200)
+        return Response(status=200)
 
 
 class LogoutView(APIView):
@@ -55,6 +58,15 @@ class ChangePassword(generics.CreateAPIView):
         user.save()
         return Response({'detail':'Password has been saved.'})
 
+'''
+
+class UserCreateAPIView(CreateAPIView):
+    serializer_class=UserSerializer1
+    queryset=User.objects.all()
+    model = get_user_model()
+    permission_classes = [
+        permissions.AllowAny  # Or anon users can't register
+    ]
 
 
 
