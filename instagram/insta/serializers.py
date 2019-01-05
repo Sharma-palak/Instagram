@@ -6,6 +6,7 @@ from django.db.models import Q
 from rest_framework.serializers import(ModelSerializer,EmailField)
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ValidationError
+from rest_framework.response import Response
 '''
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField()
@@ -79,48 +80,72 @@ class UserCreateSerializer(ModelSerializer):
            # lastname=lastname,
         )
         user_obj.set_password(password)
-        user_obj.save()
+        # user_obj.save()
         return validated_data
 
 '''
-class UserSerializer1(serializers.ModelSerializer):
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
     email=EmailField(label='Email Address')
-    email2=EmailField(label='Confirm Email')
+    # email2=EmailField(label='Confirm Email')
+    password = serializers.CharField(style={'input_type': 'password'})
+    #password2=serializers.CharField(label='Confirm Password')
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email','email2', 'first_name','last_name')
-        #write_only_fields = ('password',)
+        fields = ('id', 'username', 'password','email','first_name','last_name')
+        write_only_fields = ('password',)
         read_only_fields = ('id',)
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {
+                        "password": {"write_only": True},
+                        #"password2":{"write_only":True},
+                        }
 
-    '''                    
-    def validate_email(self,data):
-        email=data['email']
-        user_qs=User.objects.filter(email=email)
-        if user_qs.exists():
-            raise ValidationError("This email has already been registered!!")
-        return data 
-    '''
-    def validate_email2(self,value):
-        data=self.get_initial()
-        email1=data.get("email")
-        email2=value
-        if email1 != email2:
-            raise ValidationError("Email Must Match")
-        return value
+
+    def validate(self,data):
+         email=data['email']
+         user_qs=User.objects.filter(email=email)
+         if user_qs.exists():
+             raise ValidationError("This email has already been registered!!")
+         return data
+
+
+
+
+
+    # def validate_password(self,value):
+    #      data=self.get_initial()
+    #      password1=data.get("password")
+    #      password2=value
+    #      if password1 != password2:
+    #          raise ValidationError("Password Must Match")
+    #      #user_qs = User.objects.filter(password=password2)
+    #      #if user_qs.exists():
+    #         # raise ValidationError("This email has already been registered!!")
+    #      return value
+
 
 
 
     def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            #email2=validated_data['email2'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
-        )
+         user = User.objects.create(
+             id=validated_data['id'],
+             username=validated_data['username'],
+             email=validated_data['email'],
+             first_name=validated_data['first_name'],
+             last_name=validated_data['last_name'],
 
-        user.set_password(validated_data['password'])
-        user.save()
 
-        return user
+         )
+         #k=self.validate_password(validated_data['password2'])
+
+         user.set_password(validated_data['password'])
+         #user.set_password(validated_data['password2'])
+
+         user.save()
+
+         return user
+
+
+
