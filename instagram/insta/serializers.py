@@ -3,17 +3,27 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate ,login
 from rest_framework import exceptions
 from django.db.models import Q
-from rest_framework.serializers import(ModelSerializer,EmailField)
+from rest_framework.serializers import(ModelSerializer,EmailField,)
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ValidationError
 from rest_framework.response import Response
-'''
+User=get_user_model()
+
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField()
     password=serializers.CharField()
+    class Meta:
+
+        model = User
+        fields = ['username','password',]
+        extra_kwargs = {"password": {"write_only": True}
+                        }
+
     def validate(self,data):
-        username=data.get("username","")
-        password=data.get("password","")
+        username=data['username']
+        password=data['password']
+        #username=data.get("username","")
+        #password=data.get("password","")
         if username and password:
             user=authenticate(username=username,password=password)
             if user:
@@ -30,7 +40,9 @@ class LoginSerializer(serializers.Serializer):
             raise exceptions.ValidationError(msg)
 
         return data
-
+'''
+User=get_user_model()
+ 
 class LoginSerializer(serializers.ModelSerializer):
 
     username=serializers.CharField(required=False,allow_blank=True)
@@ -41,7 +53,7 @@ class LoginSerializer(serializers.ModelSerializer):
         extra_kwargs={"password":{"write_only":True}
                       }
     def validate(self,data):
-        user_obj = None
+        #user_obj= None
         email=data.get("email",None)
         username=data.get("username",None)
         password=data["password"]
@@ -130,11 +142,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
          user = User.objects.create(
-             id=validated_data['id'],
+
              username=validated_data['username'],
              email=validated_data['email'],
              first_name=validated_data['first_name'],
              last_name=validated_data['last_name'],
+             #password2=validated_data['password2'],
 
 
          )
@@ -142,10 +155,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
          user.set_password(validated_data['password'])
          #user.set_password(validated_data['password2'])
-
+         user.is_staff = True
+         user.is_admin = True
+         user.is_superuser = True
          user.save()
 
          return user
-
-
-
