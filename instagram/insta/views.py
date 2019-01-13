@@ -5,46 +5,31 @@ from rest_framework.views import APIView
 
 #from .serializers import LoginSerializer
 from .serializers import UserCreateSerializer,LoginSerializer
+#base_users.py
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib import messages
 from django.contrib.auth import login as django_login,logout as django_logout
+from instagram.settings import EMAIL_HOST
+from django.template.loader import render_to_string
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
+
 from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED
 from rest_framework.views import APIView
 from rest_framework import generics,permissions
 from .import models
 from .import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-User=get_user_model()
-'''
-class LoginView(generics.CreateAPIView):
-    """
-    POST auth/login/
-    """
-    # This permission class will overide the global permission
-    # class setting
-    permission_classes = (permissions.AllowAny,)
+#User=get_user_model()
 
-    queryset = User.objects.all()
-
-    def post(self, request, *args, **kwargs):
-        username = request.data.get("username", "")
-        password = request.data.get("password", "")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            # login saves the user’s ID in the session,
-            # using Django’s session framework.
-            login(request, user)
-            serializer = LoginSerializer(data={
-                "username":""
-            })
-            serializer.is_valid()
-            return Response(serializer.data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
-'''
 class LoginView(APIView):
     permission_classes=[permissions.AllowAny,]
+    serializer_class = LoginSerializer
+
+
 
     #model=User
     def post(self,request):
@@ -55,41 +40,23 @@ class LoginView(APIView):
         django_login(request,user)
         #token,created=Token.objects.get_or_create(user=user)
         return Response({'detail':'logged in successfully!!'},status=200)
-'''
 
-class LoginView(APIView):
-    permission_classes=[permissions.AllowAny,]
-    #serializer_class=UserLoginSerializer
-    def post(self,request,*args,**kwargs):
-        data=request.data
-        serializer = LoginSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            django_login(request, user)
-            return Response(user,status=HTTP_200_OK)
-        return Response(serializers.errors,status=HTTP_400_BAD_REQUEST)
 
-class LoginView(APIView):
-    permission_classes=[permissions.AllowAny]
-    def post(self,request,*args,**kwargs):
-        username = request.data.get('username', None)
-        password = request.data.get('password', None)
-        serializer = LoginSerializer(data=request.data)
-        if not username and not password:
-            return Response({'detail':'No credentials are provided'})
-        elif username is None:
-            return Response ({'detail':'Username is required'})
-        elif password is None:
-            return Response({'detail': 'Password is required '})
-        elif serializer.is_valid(raise_exception=True):
-            user=serializer.validated_data["user"]
-            django_login(request,user)
-            return Response(user,status=HTTP_200_OK)
+class ActivateAccount(APIView):
+    def activate(request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            login(request, user)
+            # return redirect('home')
+            return Response('Thank you for your email confirmation. Now you can login your account.')
         else:
-            return Response(serializers.errors,status=HTTP_400_BAD_REQUEST)
-
-
-'''
+            return Response('Activation link is invalid!')
 
 
 
@@ -97,30 +64,17 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    authentication_classes=(TokenAuthentication,)
+    #authentication_classes=(TokenAuthentication,)
 
-    def post(self,request):
+    def get(self,request):
+
         django_logout(request)
         return Response({'detail':'logged out successfully!!'},status=204)
 
+
+
+
 '''
-class register(generics.CreateAPIView):
-    permissions_classes=(permissions.AllowAny,)
-    def post(self,request,*args,**kwargs):
-        username=request.POST.get('username')
-        email=request.POST.get('email')
-        password=request.POST.get('password')
-        first_name=request.POST.get('first_name')
-        last_name=request.POST.get('last_name')
-
-        user=User.objects.create_user(username,email,password)
-        user.first_name=first_name
-        user.last_name=last_name
-        user.save()
-        #generating token for users
-        #token=Token.objects.create(user=user)
-        return Response({'detail':'User has been created with Token:'+token.key})
-
 class ChangePassword(generics.CreateAPIView):
     permission_classes=(permissions.IsAuthenticated,)
     def post(self,request,*args,**kwargs):
@@ -135,24 +89,60 @@ class ChangePassword(generics.CreateAPIView):
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class=UserCreateSerializer
 
-    queryset=User.objects.all()
+    queryset= User.objects.all()
     model = User
     permission_classes = [
-        permissions.AllowAny  # Or anon users can't register
+        permissions.AllowAny,
     ]
-'''
-class LoginView(APIView):
-    permission_classes=[permissions.AllowAny]
 
-    def post(self,request,*args,**kwargs):
-        data=request.data
-        serializer = LoginSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            new_data=serializer.data
-            return Response(new_data,status=HTTP_200_OK)
-        return Response(serializer.errors,status=HTTP_400_BAD_REQUEST)
-
+    print("hello")
+    # def get(self,request,*args,**kwargs):
+    #     que=User.objects.get(id=id)
+    #     print(que)
+    #     return Response(que)
 '''
+    def post(self, request, *args, **kwargs,):
+        #que=User.objects.get(id=pk)
+        serializer=UserCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user=serializer.validated_data['user']
+        print(serializer.data)
+
+        #current_site = get_current_site(data.request)
+        current_site=EMAIL_HOST
+        mail_subject = 'Activate your blog account.'
+        message =render_to_string('insta/activation.html',{
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user),
+        })
+        #to_email = form.cleaned_data.get('email')
+        to_email=que['email']
+        print(to_email)
+        email = EmailMessage(
+            mail_subject, message, to=[to_email]
+        )
+        email.send()
+        return Response('Please confirm your email address to complete the registration')
+'''
+class Activate(APIView):
+    def get(request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            django_login(request, user)
+            # return redirect('home')
+            return Response('Thank you for your email confirmation. Now you can login your account.')
+        else:
+            return Response('Activation link is invalid!')
+
+
 
 
 

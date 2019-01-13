@@ -9,7 +9,7 @@ from rest_framework_jwt.views import verify_jwt_token
 from django.conf.urls import url
 
 #from .views import(LoginView,LogoutView,register,ChangePassword,UserCreateAPIView)
-from .views import(UserCreateAPIView,LoginView,LogoutView)
+from .views import(UserCreateAPIView,LoginView,LogoutView,Activate)
 
 urlpatterns = [
     path('login/',LoginView.as_view()),
@@ -22,7 +22,6 @@ urlpatterns = [
     url(r'^auth-jwt/', obtain_jwt_token),
     url(r'^auth-jwt-refresh/', refresh_jwt_token),
     url(r'^auth-jwt-verify/', verify_jwt_token),
-
-
-
+    url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+    Activate.as_view(), name='activate'),
 ]
