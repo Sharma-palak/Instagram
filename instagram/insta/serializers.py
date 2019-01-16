@@ -5,17 +5,11 @@ from rest_framework import exceptions
 from django.db.models import Q
 from rest_framework.serializers import(ModelSerializer,EmailField,IntegerField)
 from django.contrib.auth import get_user_model
-from django import request
+from rest_framework import request
 from rest_framework.serializers import ValidationError
-from rest_framework.response import Response
-from instagram.settings import EMAIL_HOST_USER
-from django.template.loader import render_to_string
-from django.contrib import messages
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from .tokens import account_activation_token
-from django.core.mail import send_mail
+
+from .models import Profile
+
 
 User=get_user_model()
 
@@ -74,7 +68,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
         }
-
+    '''
     def validate(self, data):
          email=data['email']
          username=data['username']
@@ -85,7 +79,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
          if user_qs.exists():
               raise ValidationError("This email has already been registered!!")
          return data
-
+    '''
 
     def create(self, validated_data):
       user = User.objects.create(
@@ -97,30 +91,73 @@ class UserCreateSerializer(serializers.ModelSerializer):
       )
       user.set_password(validated_data['password'])
       user.save()
-      #return user
-      current_site = get_current_site(request)
-
-      from_mail =EMAIL_HOST_USER
-      mail_subject = 'Activate your blog account.'
-      message = render_to_string('insta/activation.html',{
-           'user': user,
-           'domain': current_site.domain,
-           'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-           'token': account_activation_token.make_token(user),
-        })
-        # to_email = form.cleaned_data.get('email')
-      to_email = user.email
-      # print(to_email)
-      # email = EmailMessage(
-      #  mail_subject, message,from_mail, to=[to_email]
-      #   )
-      #email.send()
-      send_mail(mail_subject, message, from_mail, to_email, fail_silently=False)
-      messages.success(request, 'Confirm your email to complete registering with ONLINE-AUCTION.')
-      return Response('Please confirm your email address to complete the registration')
+      return user
 
 
 
 
 
+'''
 
+class ProfileSerializer(serializers.ModelSerializer):
+    # username = serializers.CharField(source='user.username')
+    # email=serializers.EmailField(source='user.email')
+    # first_name=serializers.CharField(source='user.first_name')
+    # last_name=serializers.CharField(source='user.last_name')
+    user=UserCreateSerializer()
+    bio = serializers.CharField(source='profile',allow_blank=True, required=False)
+    phone_no = serializers.CharField(source='profile')
+    birth_date = serializers.DateField(source='profile')
+    image = serializers.ImageField(source='profile')
+
+    class Meta:
+        model = Profile
+        fields = ('user', 'bio', 'image','phone_no',
+                  'birth_date',)
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        profile_data=Profile.objects.create(
+            user_data=user_data,
+            bio=validated_data['bio'],
+            phone_no=validated_data['phone_no'],
+            birth_date=validated_data['birth_date'],
+            image=validated_data['image']
+        )
+        return profile_data
+
+'''
+class ProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = ('id','image', 'bio', 'phone_no', 'birth_date')
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile=ProfileSerializer(required=False)
+    class Meta:
+        model=User
+        fields=['username','first_name','last_name','email','profile']
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        user = User.objects.create(**validated_data)
+        Profile.objects.create(user=user, **profile_data)
+        return user
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile')
+        profile = instance.profile
+
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.first_name=validated_data.get('first_name',instance.first_name)
+        instance.last_name=validated_data.get('last_name',instance.last_name)
+        instance.save()
+
+        profile.image = profile_data.get('image',profile.image)
+        profile.bio=profile_data.get('bio',profile.bio)
+        profile.phone_no=profile_data.get('phone_no',profile.phone_no)
+        profile.birth_date=profile_data.get('birth_date',profile.birth_date)
+        profile.save()
+        return instance

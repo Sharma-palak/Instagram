@@ -7,12 +7,14 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 from django.conf.urls import url
+from django.conf import settings
+from django.conf.urls.static import static
 
 #from .views import(LoginView,LogoutView,register,ChangePassword,UserCreateAPIView)
-from .views import(UserCreateAPIView,LoginView,LogoutView,Activate)
+from .views import(UserCreateAPIView,LoginView,LogoutView,Activate,ProfileView,)
 
 urlpatterns = [
-    path('login/',LoginView.as_view()),
+    path('login/',LoginView.as_view(),name='login'),
     path('logout/',LogoutView.as_view()),
     #('register/',register.as_view()),
     #path('loginin/',view=views.obtain_auth_token),
@@ -24,4 +26,7 @@ urlpatterns = [
     url(r'^auth-jwt-verify/', verify_jwt_token),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
     Activate.as_view(), name='activate'),
-]
+    #url(r'^profile/(?P<id>[0-9]+)/$',ProfileView.as_view(), name='profile'),
+    path('profile/<int:pk>/',ProfileView.as_view(),name='profile'),
+    #path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
