@@ -133,6 +133,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('id','image', 'bio', 'phone_no', 'birth_date')
 
+
+class ProfileViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Profile
+        fields=('id','image','bio')
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     profile=ProfileSerializer(required=False)
     class Meta:

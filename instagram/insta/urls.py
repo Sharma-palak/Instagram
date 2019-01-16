@@ -11,7 +11,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 #from .views import(LoginView,LogoutView,register,ChangePassword,UserCreateAPIView)
-from .views import(UserCreateAPIView,LoginView,LogoutView,Activate,ProfileView,)
+from .views import(UserCreateAPIView,LoginView,LogoutView,Activate,ProfileEdit,Profile_View)
 
 urlpatterns = [
     path('login/',LoginView.as_view(),name='login'),
@@ -27,6 +27,6 @@ urlpatterns = [
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
     Activate.as_view(), name='activate'),
     #url(r'^profile/(?P<id>[0-9]+)/$',ProfileView.as_view(), name='profile'),
-    path('profile/<int:pk>/',ProfileView.as_view(),name='profile'),
-    #path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
+    path('profile/<int:pk>/',ProfileEdit.as_view(),name='profile'),
+    path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

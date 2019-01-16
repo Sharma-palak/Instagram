@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from rest_framework import generics
 
 #from .serializers import LoginSerializer
-from .serializers import UserCreateSerializer,LoginSerializer,ProfileSerializer,UserProfileSerializer
+from .serializers import (UserCreateSerializer,LoginSerializer,ProfileSerializer,
+ProfileViewSerializer, UserProfileSerializer)
 from django.shortcuts import redirect
 #base_users.py
 from django.contrib.sites.shortcuts import get_current_site
@@ -183,20 +184,19 @@ class ProfileView(APIView):
         serializer.save()
 '''
 
-class ProfileView(generics.RetrieveUpdateDestroyAPIView):
+class ProfileEdit(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
 
-'''
+
 class Profile_View(APIView):
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileViewSerializer
     def get(self,request,id,*args,**kwargs):
         get_data=Profile.objects.get(id=id)
-        context={
-            "get_data":get_data
-        }
-        return Response(request,context)
-'''
+        serializer=ProfileViewSerializer(get_data)
+        return Response(serializer.data)
+
+
 
 
 
