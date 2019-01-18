@@ -7,11 +7,9 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 from django.conf.urls import url
-from django.conf import settings
-from django.conf.urls.static import static
 
 #from .views import(LoginView,LogoutView,register,ChangePassword,UserCreateAPIView)
-from .views import(UserCreateAPIView,LoginView,LogoutView,Activate,ProfileEdit,Profile_View)
+from .views import(UserCreateAPIView,LoginView,LogoutView,Activate,ProfileEdit,Profile_View,Post_View)
 
 urlpatterns = [
     path('login/',LoginView.as_view(),name='login'),
@@ -29,4 +27,5 @@ urlpatterns = [
     #url(r'^profile/(?P<id>[0-9]+)/$',ProfileView.as_view(), name='profile'),
     path('profile/<int:pk>/',ProfileEdit.as_view(),name='profile'),
     path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('post_view/<int:id>/',Post_View.as_view(),name='post'),
+]

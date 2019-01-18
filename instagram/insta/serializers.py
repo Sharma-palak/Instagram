@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import request
 from rest_framework.serializers import ValidationError
 
-from .models import Profile
+from .models import Profile,Post
 
 
 User=get_user_model()
@@ -168,3 +168,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         profile.birth_date=profile_data.get('birth_date',profile.birth_date)
         profile.save()
         return instance
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('user','id','caption', 'picture', 'files','date_created',)
+
+        def create(self, validated_data):
+            post1 = User.objects.create(**validated_data)
+            return post1
+
+

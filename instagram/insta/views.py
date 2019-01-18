@@ -7,7 +7,7 @@ from rest_framework import generics
 
 #from .serializers import LoginSerializer
 from .serializers import (UserCreateSerializer,LoginSerializer,ProfileSerializer,
-ProfileViewSerializer, UserProfileSerializer)
+ProfileViewSerializer, UserProfileSerializer,PostSerializer)
 from django.shortcuts import redirect
 #base_users.py
 from django.contrib.sites.shortcuts import get_current_site
@@ -26,7 +26,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from .tokens import account_activation_token
 from django.core.mail import send_mail
-from .models import Profile
+from .models import Profile,Post
 
 from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_201_CREATED
@@ -195,6 +195,11 @@ class Profile_View(APIView):
         get_data=Profile.objects.get(id=id)
         serializer=ProfileViewSerializer(get_data)
         return Response(serializer.data)
+
+
+class Post_View(generics.RetrieveDestroyAPIView):
+    queryset=Post.objects.all()
+    serializer_class=PostSerializer
 
 
 

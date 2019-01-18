@@ -10,7 +10,7 @@ from django.dispatch import receiver
 class Profile(models.Model):
     #owner = models.ForeignKey('auth.User', related_name='profiles', on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE,)
-    image=models.ImageField(blank=True)
+    image=models.ImageField(upload_to='profile_images',blank=True)
     bio = models.TextField(max_length=500, blank=True)
     phone_no =models.CharField(max_length=10,blank=True)
     birth_date = models.DateField(null=True,blank=True)
@@ -27,5 +27,9 @@ class Profile(models.Model):
     def save_profile(sender, instance, **kwargs):
         instance.profile.save()
 
-
-
+class Post(models.Model):
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    caption=models.TextField(max_length=500, blank=True)
+    picture=models.ImageField(upload_to='post_images',blank=True)
+    files=models.FileField(upload_to='doc',blank=True)
+    date_created=models.DateTimeField(auto_now_add=True)
