@@ -15,7 +15,7 @@ User=get_user_model()
 
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField()
-    password=serializers.CharField()
+    password=serializers.CharField(style={'input_type': 'password'},required=True)
     print("1")
 
     class Meta:
@@ -172,10 +172,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('user','id','caption', 'picture', 'files','date_created',)
+        fields = ('user','id','caption','title', 'picture', 'files','date_created',)
 
-        def create(self, validated_data):
-            post1 = User.objects.create(**validated_data)
-            return post1
+    def create(self, validated_data):
+        post1 = Post.objects.create(**validated_data)
+        return post1
 
 

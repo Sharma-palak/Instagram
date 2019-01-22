@@ -29,7 +29,10 @@ class Profile(models.Model):
 
 class Post(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
-    caption=models.TextField(max_length=500, blank=True)
-    picture=models.ImageField(upload_to='post_images',blank=True)
-    files=models.FileField(upload_to='doc',blank=True)
+    title = models.CharField(max_length=255,default=None,blank=True)
+    caption=models.TextField(max_length=500, blank=True,default=None)
+    picture=models.ImageField(upload_to='profile_images',blank=True)
+    files=models.FileField(upload_to='profile_images',blank=True)
     date_created=models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.title

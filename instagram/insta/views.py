@@ -9,6 +9,7 @@ from rest_framework import generics
 from .serializers import (UserCreateSerializer,LoginSerializer,ProfileSerializer,
 ProfileViewSerializer, UserProfileSerializer,PostSerializer)
 from django.shortcuts import redirect
+from rest_framework import status
 #base_users.py
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
@@ -36,7 +37,7 @@ from .import models
 from .import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-#User=get_user_model()
+User=get_user_model()
 
 class LoginView(APIView):
     permission_classes=[permissions.AllowAny,]
@@ -196,13 +197,35 @@ class Profile_View(APIView):
         serializer=ProfileViewSerializer(get_data)
         return Response(serializer.data)
 
-
-class Post_View(generics.RetrieveDestroyAPIView):
+'''
+class Post_View(generics.RetrieveUpdateDestroyAPIView):
     queryset=Post.objects.all()
     serializer_class=PostSerializer
+'''
+class Post_View(APIView):
+    serializer_class=PostSerializer
+    def get(self,request,*args,**kwargs):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+    def post(self,request,id,*args,**kwargs):
+        data={
+            'id':id,
+            'user':request.user.id,
+            'title':request.data.get('title'),
+            'caption':request.data.get('caption'),
+            'image':request.data.get('image'),
+            'file':request.data.get('file'),
+        }
+        serializer = PostSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+# class Post_Element(APIView):
+#     def get(self,request,id,*args,**kwargs):
 
 
 

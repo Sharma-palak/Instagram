@@ -27,5 +27,5 @@ urlpatterns = [
     #url(r'^profile/(?P<id>[0-9]+)/$',ProfileView.as_view(), name='profile'),
     path('profile/<int:pk>/',ProfileEdit.as_view(),name='profile'),
     path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
-    path('post_view/<int:id>/',Post_View.as_view(),name='post'),
+    path('post/<int:id>/',Post_View.as_view(),name='post'),
 ]
