@@ -90,6 +90,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
           password=validated_data['password'],
       )
       user.set_password(validated_data['password'])
+      user.is_active=False
       user.save()
       return user
 
@@ -128,7 +129,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 '''
 class ProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Profile
         fields = ('id','image', 'bio', 'phone_no', 'birth_date')
@@ -144,7 +144,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     profile=ProfileSerializer(required=False)
     class Meta:
         model=User
-        fields=['username','first_name','last_name','email','profile']
+        fields=['id','username','first_name','last_name','email','profile']
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')

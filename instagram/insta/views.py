@@ -39,21 +39,20 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 User=get_user_model()
 
+
 class LoginView(APIView):
     permission_classes=[permissions.AllowAny,]
     serializer_class = LoginSerializer
 
-
-
-    #model=User
     def post(self,request):
         serializer=LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user=serializer.validated_data["user"]
         #password=serializer.validated_data['password']
         django_login(request,user)
+
         #token,created=Token.objects.get_or_create(user=user)
-        return Response({'detail':'logged in successfully!!'},status=200)
+        return Response({'user_id': user.id}, status=200)
 
 
 
@@ -138,7 +137,7 @@ class UserCreateAPIView(generics.CreateAPIView):
         #   )
         # email.send()
         send_mail(mail_subject, message, from_mail,to_email, fail_silently=False)
-        messages.success(request, 'Confirm your email to complete registering with ONLINE-AUCTION.')
+        messages.success(request, 'Confirm your email to complete registering with INstagram.')
         return Response('Please confirm your email address to complete the registration')
 
 
@@ -202,20 +201,25 @@ class Post_View(generics.RetrieveUpdateDestroyAPIView):
     queryset=Post.objects.all()
     serializer_class=PostSerializer
 '''
+
+
 class Post_View(APIView):
+
     serializer_class=PostSerializer
     def get(self,request,*args,**kwargs):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-    def post(self,request,id,*args,**kwargs):
+
+
+    def post(self,request,*args,**kwargs):
         data={
             'id':id,
             'user':request.user.id,
             'title':request.data.get('title'),
             'caption':request.data.get('caption'),
-            'image':request.data.get('image'),
-            'file':request.data.get('file'),
+            'picture':request.data.get('picture'),
+            'files':request.data.get('files'),
         }
         serializer = PostSerializer(data=data)
         if serializer.is_valid():

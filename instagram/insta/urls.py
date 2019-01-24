@@ -25,7 +25,9 @@ urlpatterns = [
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
     Activate.as_view(), name='activate'),
     #url(r'^profile/(?P<id>[0-9]+)/$',ProfileView.as_view(), name='profile'),
+    #re_path(r'^profile/<int:pk>/$',ProfileEdit.as_view(),name='profile'),
     path('profile/<int:pk>/',ProfileEdit.as_view(),name='profile'),
     path('profile_view/<int:id>/',Profile_View.as_view(),name='profile_view'),
+    #path('post/(?P<id>[0-9]+)/',Post_View.as_view(),name='post'),
     path('post/<int:id>/',Post_View.as_view(),name='post'),
 ]

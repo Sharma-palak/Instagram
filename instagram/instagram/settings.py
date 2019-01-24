@@ -25,9 +25,9 @@ SECRET_KEY = 'bi31n$+^ug4s14=+9==fisa(*3125v_6-bve6i+@gemo@8g+n5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','e79fa119.ngrok.io']
 #'e4fac40d.ngrok.io'
-
+#'127.0.0.1','0834330a.ngrok.io'
 # Application definition
 
 INSTALLED_APPS = [
