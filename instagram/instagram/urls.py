@@ -17,13 +17,16 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import refresh_jwt_token
+from rest_framework_jwt.views import verify_jwt_token
 from django.conf.urls import url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/',include('insta.urls')),
-    path('api-auth/', include('rest_framework.urls'))
-
-
+    path('', include('insta.urls')),
+    path('api-auth/', include('rest_framework.urls')),
+    url(r'^auth-jwt-obtain/', obtain_jwt_token),
+    url(r'^auth-jwt-refresh/', refresh_jwt_token),
+    url(r'^auth-jwt-verify/', verify_jwt_token),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

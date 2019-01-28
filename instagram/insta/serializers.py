@@ -128,10 +128,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         return profile_data
 
 '''
+
 class ProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
-        fields = ('id','image', 'bio', 'phone_no', 'birth_date')
+        fields = ('image', 'bio', 'phone_no',)
 
 
 class ProfileViewSerializer(serializers.ModelSerializer):
@@ -142,6 +144,7 @@ class ProfileViewSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     profile=ProfileSerializer(required=False)
+
     class Meta:
         model=User
         fields=['id','username','first_name','last_name','email','profile']
@@ -165,17 +168,26 @@ class UserProfileSerializer(serializers.ModelSerializer):
         profile.image = profile_data.get('image',profile.image)
         profile.bio=profile_data.get('bio',profile.bio)
         profile.phone_no=profile_data.get('phone_no',profile.phone_no)
-        profile.birth_date=profile_data.get('birth_date',profile.birth_date)
+        #profile.birth_date=profile_data.get('birth_date',profile.birth_date)
         profile.save()
         return instance
+#
+# class PostSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Post
+#         fields = ('id','caption','title', 'picture','date_created',)
+#         read_only_fields = ('user',)
+#
+#     def create(self, validated_data):
+#         post1 = Post.objects.create(**validated_data)
+#         return post1
+
 
 class PostSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Post
-        fields = ('user','id','caption','title', 'picture', 'files','date_created',)
-
-    def create(self, validated_data):
-        post1 = Post.objects.create(**validated_data)
-        return post1
+        fields = '__all__'
+        read_only_fields = ('user',)
 
 
