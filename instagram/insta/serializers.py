@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import request
 from rest_framework.serializers import ValidationError
 
-from .models import Profile,Post
+from .models import (Profile,Post)
 
 
 User=get_user_model()
@@ -129,48 +129,48 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 '''
 
-class ProfileSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Profile
-        fields = ('image', 'bio', 'phone_no',)
-
-
-class ProfileViewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=Profile
-        fields=('id','image','bio')
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    profile=ProfileSerializer(required=False)
-
-    class Meta:
-        model=User
-        fields=['id','username','first_name','last_name','email','profile']
-
-    def create(self, validated_data):
-        profile_data = validated_data.pop('profile')
-        user = User.objects.create(**validated_data)
-        Profile.objects.create(user=user, **profile_data)
-        return user
-
-    def update(self, instance, validated_data):
-        profile_data = validated_data.pop('profile')
-        profile = instance.profile
-
-        instance.username = validated_data.get('username', instance.username)
-        instance.email = validated_data.get('email', instance.email)
-        instance.first_name=validated_data.get('first_name',instance.first_name)
-        instance.last_name=validated_data.get('last_name',instance.last_name)
-        instance.save()
-
-        profile.image = profile_data.get('image',profile.image)
-        profile.bio=profile_data.get('bio',profile.bio)
-        profile.phone_no=profile_data.get('phone_no',profile.phone_no)
-        #profile.birth_date=profile_data.get('birth_date',profile.birth_date)
-        profile.save()
-        return instance
+# class ProfileSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Profile
+#         fields = ('image', 'bio', 'phone_no',)
+#
+#
+# class ProfileViewSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=Profile
+#         fields=('id','image','bio')
+#
+#
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     profile=ProfileSerializer(required=False)
+#
+#     class Meta:
+#         model=User
+#         fields=['id','username','first_name','last_name','email','profile']
+#
+#     def create(self, validated_data):
+#         profile_data = validated_data.pop('profile')
+#         user = User.objects.create(**validated_data)
+#         Profile.objects.create(user=user, **profile_data)
+#         return user
+#
+#     def update(self, instance, validated_data):
+#         profile_data = validated_data.pop('profile')
+#         profile = instance.profile
+#
+#         instance.username = validated_data.get('username', instance.username)
+#         instance.email = validated_data.get('email', instance.email)
+#         instance.first_name=validated_data.get('first_name',instance.first_name)
+#         instance.last_name=validated_data.get('last_name',instance.last_name)
+#         instance.save()
+#
+#         profile.image = profile_data.get('image',profile.image)
+#         profile.bio=profile_data.get('bio',profile.bio)
+#         profile.phone_no=profile_data.get('phone_no',profile.phone_no)
+#         #profile.birth_date=profile_data.get('birth_date',profile.birth_date)
+#         profile.save()
+#         return instance
 #
 # class PostSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -187,7 +187,16 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('id','title','caption','picture','files','date_created','user')
+        read_only_fields = ('user','id')
+        def get_user(self,obj):
+            return str(obj.user.username)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('id','user','image','bio','phone_no')
         read_only_fields = ('user',)
 
 

@@ -39,6 +39,8 @@ from rest_framework import generics,permissions
 # from .serializers import *
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+
+from rest_framework.decorators import action
 User=get_user_model()
 
 
@@ -183,7 +185,6 @@ class ProfileView(APIView):
         serializer=ProfileSerializer(data=temp)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-'''
 
 class ProfileEdit(generics.RetrieveUpdateAPIView):
     permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
@@ -199,21 +200,60 @@ class Profile_View(APIView):
         serializer=ProfileViewSerializer(get_data)
         return Response(serializer.data)
 
-'''
+
 class Post_View(generics.RetrieveUpdateDestroyAPIView):
     queryset=Post.objects.all()
     serializer_class=PostSerializer
+
 '''
 
 
 class PostView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+    permission_classes = (permissions.IsAuthenticated,IsPostOrReadOnly)
+    parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user.username)
+
+    # def perform_update(self, serializer):
+    #     instance=serializer.save(user=self.request.user)
+    #     instance.save()
+
+    # @action(methods=['post'],detail=True)
+    # def create_post(self, request):
+    #     serializer = PostSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save(user=request.user.id)
+    #         return Response({'data': serializer.data}, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
-#
+
+
+
+
+class ProfileView(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+    #
+    # @action(methods=['get'], detail=True)
+    # def get_profile(self, request, pk=None):
+    #     get_data=Profile.objects.get(id=pk)
+    #     serializer = ProfileViewSerializer(get_data)
+    #     return Response(serializer.data)
+
+
+
+
+
+
+# #
 # class Post_View(APIView):
 #
 #     serializer_class=PostSerializer
@@ -257,27 +297,27 @@ class PostView(viewsets.ModelViewSet):
 #         response=serializer.data+serializer2.data
 #         return Response(response)
 # '''
-class Post_Detail(APIView):
-    permission_classes = (permissions.IsAuthenticated, IsPostOrReadOnly)
-    def get_object(self, pk,):
-        try:
-            return Post.objects.get(pk=pk)
-        except Post.DoesNotExist:
-            raise Http404
+# class Post_Detail(APIView):
+#     permission_classes = (permissions.IsAuthenticated, IsPostOrReadOnly)
+#     def get_object(self, pk,):
+#         try:
+#             return Post.objects.get(pk=pk)
+#         except Post.DoesNotExist:
+#             raise Http404
+#
+#     def get(self, request, pk, format=None):
+#         post1 = self.get_object(pk)
+#         post_image = PostSerializer(post1)
+#         post_video=PostSerializer2(post1)
+#         response=post_image.data
+#         return Response(response)
+#
+#     def delete(self, request, pk, format=None):
+#         post = self.get_object(pk)
+#         post.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get(self, request, pk, format=None):
-        post1 = self.get_object(pk)
-        post_image = PostSerializer(post1)
-        post_video=PostSerializer2(post1)
-        response=post_image.data
-        return Response(response)
-
-    def delete(self, request, pk, format=None):
-        post = self.get_object(pk)
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-# '''
+#
 # class Post_Detail(generics.DestroyAPIView):
 #     permission_classes = (permissions.IsAuthenticated,IsPostOrReadOnly)
 #     queryset = Post.objects.all()
