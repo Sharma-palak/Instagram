@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import request
 from rest_framework.serializers import ValidationError
 
-from .models import (Profile,Post)
+from .models import (Profile,Post,Activity,Comment)
 
 
 User=get_user_model()
@@ -189,8 +189,8 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id','title','caption','picture','files','date_created','user')
         read_only_fields = ('user','id')
-        def get_user(self,obj):
-            return str(obj.user.username)
+        # def get_user(self,obj):
+        #     return str(obj.user.username)
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -198,5 +198,19 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('id','user','image','bio','phone_no')
         read_only_fields = ('user',)
+
+
+class LikeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Activity
+        fields = ('user', 'post', 'like')
+        read_only_fields = ('user', 'post')
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('user','post','text','created_date')
+        read_only_fields = ('user','post','created_date')
 
 

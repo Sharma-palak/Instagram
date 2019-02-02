@@ -1,10 +1,15 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Profile,Post
+from .models import (Profile,Post)
+from .models import (Profile,Post,Activity,Comment)
 
 admin.site.register(Profile)
 admin.site.register(Post)
+admin.site.register(Activity)
+admin.site.register(Comment)
+
+
 '''
   current_site = get_current_site(request)
 

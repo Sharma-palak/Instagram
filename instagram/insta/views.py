@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import generics
 
 #from .serializers import LoginSerializer
+from django.shortcuts import get_object_or_404
 from .serializers import *
 from django.shortcuts import redirect
 from rest_framework import status
@@ -78,16 +79,6 @@ class LogoutView(APIView):
 
 
 
-'''
-class ChangePassword(generics.CreateAPIView):
-    permission_classes=(permissions.IsAuthenticated,)
-    def post(self,request,*args,**kwargs):
-        user=get_object_or_404(User,username=request.user)
-        user.set_password(request.POST.get('new_password'))
-        user.save()
-        return Response({'detail':'Password has been saved.'})
-
-'''
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -130,13 +121,9 @@ class UserCreateAPIView(generics.CreateAPIView):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
                 'token': account_activation_token.make_token(user),
             })
-            # to_email = form.cleaned_data.get('email')
+
             to_email = [user.email]
-            # print(to_email)
-            # email = EmailMessage(
-            #  mail_subject, message,from_mail, to=[to_email]
-            #   )
-            # email.send()
+
             send_mail(mail_subject, message, from_mail, to_email, fail_silently=False)
             messages.success(request, 'Confirm your email to complete registering with Instagram.')
             return Response({'message': 'Please confirm your email address to complete the registration',},
@@ -212,10 +199,42 @@ class PostView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     permission_classes = (permissions.IsAuthenticated,IsPostOrReadOnly)
-    parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+    #parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+    # @action(detail=False, methods=['post'])
+    # def list1(self,request,*args,**kwargs):
+    #     serializer = PostSerializer(data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         return Response({'detail':serializer.data})
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user.username)
+        serializer.save(user=self.request.user)
+
+# class LikeView(viewsets.ModelViewSet):
+#     serializer_class = LikeSerializer
+#     queryset = Post.objects.all()
+#     def perform_create(self, serializer):
+#         serializer.save(likes=self.request.user)
+
+    # def get_user(self, obj):
+    #     return str(obj.user.username)
+
+# class LikeView(viewsets.ModelViewSet):
+#     serializer_class = LikeSerializer
+#     queryset = Activity.objects.all()
+#     permission_classes = (permissions.IsAuthenticated,)
+#
+#     @action(detail=False, methods=['post','get'])
+#     def get_like(self,request,*args,**kwargs):
+#         post =
+
+
+
+
+
+
+
+
+
 
     # def perform_update(self, serializer):
     #     instance=serializer.save(user=self.request.user)
@@ -239,14 +258,57 @@ class PostView(viewsets.ModelViewSet):
 class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
-    #
-    # @action(methods=['get'], detail=True)
-    # def get_profile(self, request, pk=None):
-    #     get_data=Profile.objects.get(id=pk)
-    #     serializer = ProfileViewSerializer(get_data)
-    #     return Response(serializer.data)
+
+
+class LikeView(APIView):
+    def get(self, request, *args, **kwargs):
+        postid = self.kwargs['postid']
+        post = Post.objects.get(id=postid)
+
+        if(Activity.objects.filter(user=request.user, post=post).exists()):
+
+            like=Activity.objects.filter(user=request.user,post=post).delete()
+        else :
+            like=Activity.objects.create(user=request.user,post=post)
+
+        result= Activity.objects.filter(post=post).count()
+        return Response({'detail':result})
+
+class CommentView(APIView):
+    def get(self,request,*args,**kwargs):
+        postid = self.kwargs.get['postid']
+        post = Post.objects.get(id=postid)
+
+
+
+
+
+
+
+
+        # try:
+        #     like = Activity.objects.filter(user=self.request.user)
+        # except (Activity.DoesNotExist):
+        #     like = None
+        # if like is None:
+        #     Activity.objects.create(post=postid,user=request.user)
+        #     return Response("Liked")
+        # else:
+        #     like=Activity.objects.filter(post=postid,user=request.user)
+        #     like.delete()
+        #     return Response("Disliked")
+
+
+
+
+
+
+
+
+
+
 
 
 
