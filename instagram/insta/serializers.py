@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import request
 from rest_framework.serializers import ValidationError
 
-from .models import (Profile,Post,Activity,Comment)
+from .models import (Post,Activity,Comment,Profile)
 
 
 User=get_user_model()
@@ -184,21 +184,49 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Post
-        fields = ('id','title','caption','picture','files','date_created','user')
-        read_only_fields = ('user','id')
-        # def get_user(self,obj):
-        #     return str(obj.user.username)
+        fields = ('id','title','caption','picture','files','date_created','name','user')
+        read_only_fields = ('id','name','user')
+
+    # def create(self, validated_data):
+    #     profile_data = validated_data.pop('profile')
+    #     user = User.objects.create(**validated_data)
+    #     Profile.objects.create(user=user, **profile_data)
+    #     return user
+    #
+    # def update(self, instance, validated_data):
+    #     profile_data = validated_data.pop('profile')
+    #     profile = instance.profile
+    #
+    #     instance.title = validated_data.get('title', instance.title)
+    #     instance.caption = validated_data.get('caption', instance.caption)
+    #     instance.pictures=validated_data.get('pictures',instance.pictures)
+    #     instance.files=validated_data.get('last_name',instance.files)
+    #     instance.save()
+    #
+    #     profile.image = profile_data.get('image',profile.image)
+    #     profile.bio=profile_data.get('bio',profile.bio)
+    #     profile.phone_no=profile_data.get('phone_no',profile.phone_no)
+    #     #profile.birth_date=profile_data.get('birth_date',profile.birth_date)
+    #     profile.save()
+    #     return instance
+
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
-        fields = ('id','user','image','bio','phone_no')
-        read_only_fields = ('user',)
+        fields = ('id','image','bio','phone_no','name','user')
+        read_only_fields = ('user','name',)
 
+# class ProfileSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = User
+#         fields = ('image','bio','phone_no','name')
+#         read_only_fields = ('name')
 
 class LikeSerializer(serializers.ModelSerializer):
 
@@ -207,10 +235,12 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ('user', 'post', 'like')
         read_only_fields = ('user', 'post')
 
+
 class CommentSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Comment
-        fields = ('user','post','text','created_date')
-        read_only_fields = ('user','post','created_date')
+        fields = ('user','post','text')
+        read_only_fields = ('user','post')
 
 

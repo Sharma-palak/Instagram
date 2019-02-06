@@ -42,7 +42,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 
 from rest_framework.decorators import action
-User=get_user_model()
+#User=get_user_model()
 
 
 class LoginView(APIView):
@@ -144,7 +144,7 @@ class Activate(APIView):
             user.save()
             django_login(request, user)
             messages.success(request,"Email Verified")
-            return redirect('login')
+            return Response({'detail':'email verified'})
         else:
             messages.error(request, "Activation Email Link is Invalid.Please try again!!")
             return redirect('register')
@@ -207,7 +207,9 @@ class PostView(viewsets.ModelViewSet):
     #         return Response({'detail':serializer.data})
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user_obj = self.request.user.username
+        print(user_obj)
+        serializer.save(user=self.request.user,name=user_obj)
 
 # class LikeView(viewsets.ModelViewSet):
 #     serializer_class = LikeSerializer
@@ -260,6 +262,45 @@ class ProfileView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+    def perform_create(self, serializer):
+        user_obj = self.request.user.username
+        serializer.save(user=self.request.user,name=user_obj)
+
+    #@action(methods=['GET'], detail=True)
+    def update(self,*args, **kwargs):
+        user = self.kwargs['pk']
+        profile = Profile.objects.filter(user_id=user)
+        serializer = ProfileSerializer(data=profile,many=True)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data)
+    #
+    #@action(methods=['POST'],detail=True)
+    def post(self, request, *args, **kwargs):
+        user_id = self.kwargs['pk']
+        profile = Profile.objects.get(user_id=user_id)
+        serializer = ProfileSerializer(data=request.data,instance=profile)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data)
+
+    # def perform_create(self, serializer):
+    #     user_obj = self.request.user.username
+    #     print(user_obj)
+    #     serializer.save(user=self.request.user,name=user_obj)
+
+
+
+# class ProfileView(viewsets.ModelViewSet):
+#     serializer_class = ProfileSerializer
+#     queryset = User.objects.all()
+#     permission_classes = (permissions.IsAuthenticated,)
+#     parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+#
+#     # def perform_update(self, serializer):
+#     #     user_obj = self.request.username
+#     #     print(user_obj)
+#     #     serializer.save(user=self.request.user,name=user_obj)
 
 
 class LikeView(APIView):
@@ -277,9 +318,38 @@ class LikeView(APIView):
         return Response({'detail':result})
 
 class CommentView(APIView):
+    serializer_class = CommentSerializer
+    
+    @action(method=['GET'],detail=True)
+    def list_comment(self,request,*args,**kwargs):
+        post_id = self.kwargs['postid']
+        comment = Comment.objects.get(id=post_id)
+        serializer = CommentSerializer(comment)
+        return Response({'detail':serializer.data})
+
     def get(self,request,*args,**kwargs):
-        postid = self.kwargs.get['postid']
-        post = Post.objects.get(id=postid)
+        post_id = self.kwargs['postid']
+        comment = Comment.objects.get(id=post_id)
+        serializer = CommentSerializer(comment)
+        return Response({'detail':serializer.data})
+
+    def post(self,request,*args,**kwargs):
+        post_id = self.kwargs['postid']
+        post = Post.objects.get(id=post_id)
+        print(post)
+
+        # try:
+        #    comment = Comment.objects.get(user=self.request.user, id=post_id)
+        # except (Comment.DoesNotExist):
+        #     comment = None
+        # if comment is None:
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user,post=post)
+            return Response({'detail':serializer.data})
+
+
+
 
 
 

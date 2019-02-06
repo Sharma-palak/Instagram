@@ -10,6 +10,7 @@ from django.dispatch import receiver
 class Profile(models.Model):
     #owner = models.ForeignKey('auth.User', related_name='profiles', on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
+    name = models.CharField(max_length=250,blank=True)
     image=models.ImageField(upload_to='profile_images',blank=True)
     bio = models.TextField(max_length=500, blank=True)
     phone_no =models.CharField(max_length=10,blank=True)
@@ -17,7 +18,7 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-
+    #
     @receiver(post_save, sender=User)
     def create_profile(sender, instance, created, **kwargs):
         if created:
@@ -27,21 +28,32 @@ class Profile(models.Model):
     def save_profile(sender, instance, **kwargs):
         instance.profile.save()
 
+# class User(AbstractUser):
+#     #user = models.OneToOneField(settings.AUTH_USER_MODEL)
+#     name = models.CharField(max_length=250, blank=True)
+#     image=models.ImageField(upload_to='profile_images',blank=True)
+#     bio = models.TextField(max_length=500, blank=True)
+#     phone_no =models.CharField(max_length=10,blank=True)
 
 class Post(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
+    name=models.CharField(max_length=250,blank=True)
     title = models.CharField(max_length=255,null=True,blank=True)
     caption=models.TextField(max_length=500, blank=True,null=True)
     picture=models.ImageField(upload_to='images',blank=True)
     files=models.FileField(upload_to='file',blank=True)
     date_created=models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.title
+        return "%s"%(self.caption)
+
+    class Meta:
+        ordering = ['-date_created']
 
 class Activity(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
-    like = models.BooleanField(default=True)
+    like = models.BooleanField(default=False)
     like_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -51,7 +63,21 @@ class Comment(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
     text = models.TextField()
-    created_date = models.DateTimeField(auto_now_add=True)
+    #created_date = models.DateTimeField(auto_now_add=True)
+
+class Friend(models.Model):
+    user = models.ManyToManyField(User,on_delete=models.CASCADE)
+    current_user = models.ForeignKey(User,null=True)
+    @classmethod
+    def make_friend(cls,current_user,new_friend):
+        friend,created = cls.objects.get_or_create(current_user=current_user)
+        friend.users.add(new_friend)
+
+    @classmethod
+    def lose_friend(cls,current_user,new_friend):
+        friend,created = cls.objects.get_or_create(current_user=current_user)
+        friend.users.remove(new_friend)
+
 
 
 # class LikeDislike(models.Model):
@@ -68,8 +94,8 @@ class Comment(models.Model):
 #     # activity = models.CharField(max_length=10,choices=VOTES,
 #     #     default=LIKE,)
 #     #
-#     # def __str__(self):
-#     #     return (self.post)
+#     def __str__(self):
+#         return "%s commented on %s"%(self.user.username,self.post.caption)
 #
 #     user=models.ForeignKey(User,on_delete=models.CASCADE)
 #     activity = models.ForeignKey(Post)

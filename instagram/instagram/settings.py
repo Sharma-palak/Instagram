@@ -26,8 +26,8 @@ SECRET_KEY = 'bi31n$+^ug4s14=+9==fisa(*3125v_6-bve6i+@gemo@8g+n5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','22183cd8.ngrok.io']
-#'e4fac40d.ngrok.io'
+ALLOWED_HOSTS = ['127.0.0.1','692f2488.ngrok.io']
+#'e4fac40d.ngrok.io'f0d.ngrok.io
 #'127.0.0.1','0834330a.ngrok.io'
 # Application definition
 #http://192.168.100.133:8000/post/
@@ -128,7 +128,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
+#UTC
 
 USE_I18N = True
 
@@ -187,3 +188,4 @@ EMAIL_HOST_USER = 'palak2906lucknow@gmail.com'
 EMAIL_HOST_PASSWORD = '8840936579palak'
 EMAIL_PORT = 587
 APPEND_SLASH=False
+#AUTH_USER_MODEL = 'insta.User'

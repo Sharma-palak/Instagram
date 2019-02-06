@@ -21,7 +21,7 @@ urlpatterns = [
     path('login/',LoginView.as_view(),name='login'),
     path('logout/',LogoutView.as_view()),
     url(r'^like/(?P<postid>[0-9]+)/$',LikeView.as_view()),
-    url(r'^like/(?P<postid>[0-9]+)/$',CommentView.as_view()),
+    url(r'^comment/(?P<postid>[0-9]+)/$',CommentView.as_view()),
     #('register/',register.as_view()),
     #path('loginin/',view=views.obtain_auth_token),
     #path('changepassword/',ChangePassword.as_view()),
