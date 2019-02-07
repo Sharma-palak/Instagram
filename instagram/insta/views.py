@@ -1,11 +1,5 @@
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework.views import APIView
 
 from rest_framework import generics
-
-#from .serializers import LoginSerializer
 from django.shortcuts import get_object_or_404
 from .filters import UserFilter
 from rest_framework import filters
@@ -13,14 +7,7 @@ from .serializers import *
 from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser,FormParser,JSONParser,FileUploadParser
-#base_users.py
-from django.contrib.sites.shortcuts import get_current_site
-from django.contrib import messages
 from django.contrib.auth import login as django_login,logout as django_logout
-from instagram.settings import EMAIL_HOST
-from django.template.loader import render_to_string
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from instagram.settings import EMAIL_HOST_USER
 from django.template.loader import render_to_string
@@ -55,10 +42,7 @@ class LoginView(APIView):
         serializer=LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user=serializer.validated_data["user"]
-        #password=serializer.validated_data['password']
         django_login(request,user)
-
-        #token,created=Token.objects.get_or_create(user=user)
         return Response({'user_id': user.id}, status=status.HTTP_201_CREATED)
 
 
@@ -71,7 +55,6 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [permissions.AllowAny, ]
-    #authentication_classes=(TokenAuthentication,)
 
     def get(self,request):
 
@@ -85,17 +68,9 @@ class LogoutView(APIView):
 
 class UserCreateAPIView(generics.CreateAPIView):
     permission_classes=(permissions.AllowAny,)
-
     serializer_class=UserCreateSerializer
-
-
     queryset= User.objects.all()
     model = User
-
-    # def get(self,request,*args,**kwargs):
-    #     que=User.objects.get(id=id)
-    #     print(que)
-    #     return Response(que)
 
     def post(self, request, *args, **kwargs,):
         username = request.data.get('username')
@@ -151,118 +126,24 @@ class Activate(APIView):
             messages.error(request, "Activation Email Link is Invalid.Please try again!!")
             return redirect('register')
 
-'''
-class ProfileView(APIView):
-    serializer_class=ProfileSerializer
-    def post(self, request,id ,*args, **kwargs):
-        phone_no=request.data.get('phone_no')
-        image=request.data.get('image')
-        bio=request.data.get('bio')
-        birth_date=request.data.get('birth_date')
-        temp={
-            # 'username':username,
-            #  'email':email,
-            #  'first_name':first_name,
-            #  'last_name':last_name,
-            'phone_no':phone_no,
-             'image':image,
-             'bio':bio,
-             'birth_date':birth_date,
-        }
 
-
-        serializer=ProfileSerializer(data=temp)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-class ProfileEdit(generics.RetrieveUpdateAPIView):
-    permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
-    queryset = User.objects.all()
-    # parser_classes = (MultiPartParser, FormParser, JSONParser,FileUploadParser)
-    serializer_class = UserProfileSerializer
-
-
-class Profile_View(APIView):
-    serializer_class = ProfileViewSerializer
-    def get(self,request,*args,**kwargs):
-        get_data=Profile.objects.get(id=request.user.id)
-        serializer=ProfileViewSerializer(get_data)
-        return Response(serializer.data)
-
-
-class Post_View(generics.RetrieveUpdateDestroyAPIView):
-    queryset=Post.objects.all()
-    serializer_class=PostSerializer
-
-'''
 
 
 class PostView(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     permission_classes = (permissions.IsAuthenticated,IsPostOrReadOnly)
-    #parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
-    # @action(detail=False, methods=['post'])
-    # def list1(self,request,*args,**kwargs):
-    #     serializer = PostSerializer(data=request.data)
-    #     if serializer.is_valid(raise_exception=True):
-    #         return Response({'detail':serializer.data})
 
     def perform_create(self, serializer):
         user_obj = self.request.user.username
         print(user_obj)
         serializer.save(user=self.request.user,name=user_obj)
 
-# class LikeView(viewsets.ModelViewSet):
-#     serializer_class = LikeSerializer
-#     queryset = Post.objects.all()
-#     def perform_create(self, serializer):
-#         serializer.save(likes=self.request.user)
-
-    # def get_user(self, obj):
-    #     return str(obj.user.username)
-
-# class LikeView(viewsets.ModelViewSet):
-#     serializer_class = LikeSerializer
-#     queryset = Activity.objects.all()
-#     permission_classes = (permissions.IsAuthenticated,)
-#
-#     @action(detail=False, methods=['post','get'])
-#     def get_like(self,request,*args,**kwargs):
-#         post =
-
-
-
-
-
-
-
-
-
-
-    # def perform_update(self, serializer):
-    #     instance=serializer.save(user=self.request.user)
-    #     instance.save()
-
-    # @action(methods=['post'],detail=True)
-    # def create_post(self, request):
-    #     serializer = PostSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save(user=request.user.id)
-    #         return Response({'data': serializer.data}, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
 
 class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
     #parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
     # def perform_create(self, serializer):
     #     user_obj = self.request.user.username
@@ -293,16 +174,6 @@ class ProfileView(viewsets.ModelViewSet):
 
 
 
-# class ProfileView(viewsets.ModelViewSet):
-#     serializer_class = ProfileSerializer
-#     queryset = User.objects.all()
-#     permission_classes = (permissions.IsAuthenticated,)
-#     parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
-#
-#     # def perform_update(self, serializer):
-#     #     user_obj = self.request.username
-#     #     print(user_obj)
-#     #     serializer.save(user=self.request.user,name=user_obj)
 
 
 class LikeView(APIView):
@@ -321,13 +192,6 @@ class LikeView(APIView):
 
 class CommentView(APIView):
     serializer_class = CommentSerializer
-    
-    # @action(method=['GET'],detail=True)
-    # def list_comment(self,request,*args,**kwargs):
-    #     post_id = self.kwargs['postid']
-    #     comment = Comment.objects.get(id=post_id)
-    #     serializer = CommentSerializer(comment)
-    #     return Response({'detail':serializer.data})
 
     def get(self,request,*args,**kwargs):
         post_id = self.kwargs['postid']
@@ -380,99 +244,3 @@ class Add_Friend(generics.ListAPIView):
 
 
 
-        # try:
-        #     like = Activity.objects.filter(user=self.request.user)
-        # except (Activity.DoesNotExist):
-        #     like = None
-        # if like is None:
-        #     Activity.objects.create(post=postid,user=request.user)
-        #     return Response("Liked")
-        # else:
-        #     like=Activity.objects.filter(post=postid,user=request.user)
-        #     like.delete()
-        #     return Response("Disliked")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# #
-# class Post_View(APIView):
-#
-#     serializer_class=PostSerializer
-#     def get(self,request,*args,**kwargs):
-#         posts = Post.objects.all()
-#         serializer = PostSerializer(posts, many=True)
-#         return Response(serializer.data)
-#
-#
-#     def post(self,request,*args,**kwargs):
-#
-#         serializer = PostSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(user=request.user)
-#             return Response({'data':serializer.data}, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-# class Post_Video(APIView):
-#     serializer_class = PostSerializer2
-#     def post(self, request, *args, **kwargs):
-#         data = {
-#             'id': id,
-#             'user': request.user.id,
-#             'title': request.data.get('title'),
-#             'caption': request.data.get('caption'),
-#             'files': request.data.get('files'),
-#             # 'files':request.data.get('files'),
-#         }
-#         serializer = PostSerializer2(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# class Post_List(APIView):
-#     serializer_class=PostSerializer2,PostSerializer
-#     def get(self, request, *args, **kwargs):
-#         posts = Post.objects.filter(picture='')
-#         posts1=Post.objects.filter(files='')
-#         serializer = PostSerializer(posts1, many=True)
-#         serializer2=PostSerializer2(posts,many=True)
-#         response=serializer.data+serializer2.data
-#         return Response(response)
-# '''
-# class Post_Detail(APIView):
-#     permission_classes = (permissions.IsAuthenticated, IsPostOrReadOnly)
-#     def get_object(self, pk,):
-#         try:
-#             return Post.objects.get(pk=pk)
-#         except Post.DoesNotExist:
-#             raise Http404
-#
-#     def get(self, request, pk, format=None):
-#         post1 = self.get_object(pk)
-#         post_image = PostSerializer(post1)
-#         post_video=PostSerializer2(post1)
-#         response=post_image.data
-#         return Response(response)
-#
-#     def delete(self, request, pk, format=None):
-#         post = self.get_object(pk)
-#         post.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-
-#
-# class Post_Detail(generics.DestroyAPIView):
-#     permission_classes = (permissions.IsAuthenticated,IsPostOrReadOnly)
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer

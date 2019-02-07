@@ -1,10 +1,4 @@
-# from rest_framework.permissions import BasePermission
-#
-#
-# class IsAllowedToEdit(BasePermission):
-#
-#     def has_permission(self, request, view):
-#         return request.user.id == "Author"
+
 from rest_framework import permissions
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
