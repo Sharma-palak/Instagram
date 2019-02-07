@@ -68,18 +68,33 @@ class UserCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
         }
-    '''
+
     def validate(self, data):
+         k=0
          email=data['email']
          username=data['username']
+         password=data['password']
+         validLetters = "abcdefghijklmnopqrstuvwxyz"
+
          query=User.objects.filter(username=username)
+         for char in username.lower():
+             if (char in validLetters):
+                 k=1
+         if (k==0):
+             raise ValidationError("Must contain alphabets")
+
+
+         if (len(username)<=4):
+             raise ValidationError("Username is too short")
+         if (len(password)<=4):
+             raise ValidationError("password is too short")
          if query.exists():
              raise ValidationError("User with this name already exists!!")
          user_qs=User.objects.filter(email=email)
          if user_qs.exists():
               raise ValidationError("This email has already been registered!!")
          return data
-    '''
+
 
     def create(self, validated_data):
       user = User.objects.create(

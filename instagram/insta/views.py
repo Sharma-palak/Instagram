@@ -7,6 +7,8 @@ from rest_framework import generics
 
 #from .serializers import LoginSerializer
 from django.shortcuts import get_object_or_404
+from .filters import UserFilter
+from rest_framework import filters
 from .serializers import *
 from django.shortcuts import redirect
 from rest_framework import status
@@ -261,28 +263,28 @@ class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
-    parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
-    def perform_create(self, serializer):
-        user_obj = self.request.user.username
-        serializer.save(user=self.request.user,name=user_obj)
-
-    #@action(methods=['GET'], detail=True)
-    def update(self,*args, **kwargs):
-        user = self.kwargs['pk']
-        profile = Profile.objects.filter(user_id=user)
-        serializer = ProfileSerializer(data=profile,many=True)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data)
+    #parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
+    # def perform_create(self, serializer):
+    #     user_obj = self.request.user.username
+    #     serializer.save(user=self.request.user,name=user_obj)
     #
-    #@action(methods=['POST'],detail=True)
-    def post(self, request, *args, **kwargs):
-        user_id = self.kwargs['pk']
-        profile = Profile.objects.get(user_id=user_id)
-        serializer = ProfileSerializer(data=request.data,instance=profile)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data)
+    # #@action(methods=['GET'], detail=True)
+    # def update(self,*args, **kwargs):
+    #     user = self.kwargs['pk']
+    #     profile = Profile.objects.filter(user_id=user)
+    #     serializer = ProfileSerializer(data=profile,many=True)
+    #     serializer.is_valid()
+    #     serializer.save()
+    #     return Response(serializer.data)
+    # #
+    # #@action(methods=['POST'],detail=True)
+    # def post(self, request, *args, **kwargs):
+    #     user_id = self.kwargs['pk']
+    #     profile = Profile.objects.get(user_id=user_id)
+    #     serializer = ProfileSerializer(data=request.data,instance=profile)
+    #     serializer.is_valid()
+    #     serializer.save()
+    #     return Response(serializer.data)
 
     # def perform_create(self, serializer):
     #     user_obj = self.request.user.username
@@ -320,17 +322,19 @@ class LikeView(APIView):
 class CommentView(APIView):
     serializer_class = CommentSerializer
     
-    @action(method=['GET'],detail=True)
-    def list_comment(self,request,*args,**kwargs):
-        post_id = self.kwargs['postid']
-        comment = Comment.objects.get(id=post_id)
-        serializer = CommentSerializer(comment)
-        return Response({'detail':serializer.data})
+    # @action(method=['GET'],detail=True)
+    # def list_comment(self,request,*args,**kwargs):
+    #     post_id = self.kwargs['postid']
+    #     comment = Comment.objects.get(id=post_id)
+    #     serializer = CommentSerializer(comment)
+    #     return Response({'detail':serializer.data})
 
     def get(self,request,*args,**kwargs):
         post_id = self.kwargs['postid']
-        comment = Comment.objects.get(id=post_id)
-        serializer = CommentSerializer(comment)
+        post = Post.objects.get(id=post_id)
+        comment = Comment.objects.filter(post=post)
+        serializer = CommentSerializer(comment,many=True)
+        print(serializer.data)
         return Response({'detail':serializer.data})
 
     def post(self,request,*args,**kwargs):
@@ -347,6 +351,24 @@ class CommentView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user,post=post)
             return Response({'detail':serializer.data})
+
+
+class Add_Friend(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+    #serializer_class = user_filter()
+    filter_backends = (filters.SearchFilter,)
+    #new_friend = ('username',)
+
+    def get(self,request,*args,**kwargs):
+        user_list = User.objects.all()
+        user_filter = UserFilter(request.GET, queryset=user_list)
+        serializer = UserCreateSerializer(user_filter)
+        return Response({'detail':serializer.data})
+
+
+
+
 
 
 
