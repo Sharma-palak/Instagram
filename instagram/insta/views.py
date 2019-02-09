@@ -1,7 +1,8 @@
 
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-from .filters import UserFilter
+#from .filters import UserFilter
+from django.db.models import Q
 from rest_framework import filters
 from .serializers import *
 from django.shortcuts import redirect
@@ -196,6 +197,7 @@ class CommentView(APIView):
     def get(self,request,*args,**kwargs):
         post_id = self.kwargs['postid']
         post = Post.objects.get(id=post_id)
+
         comment = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comment,many=True)
         print(serializer.data)
@@ -204,7 +206,6 @@ class CommentView(APIView):
     def post(self,request,*args,**kwargs):
         post_id = self.kwargs['postid']
         post = Post.objects.get(id=post_id)
-        print(post)
 
         # try:
         #    comment = Comment.objects.get(user=self.request.user, id=post_id)
@@ -220,16 +221,24 @@ class CommentView(APIView):
 class Add_Friend(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
-    #serializer_class = user_filter()
     filter_backends = (filters.SearchFilter,)
-    #new_friend = ('username',)
+    search_fields = ('username',)
+    def get_queryset(self,*args,**kwargs):
+         operation = self.kwargs['operation']
+         print(type(operation))
+         queryset_list = User.objects.all()
+         query = self.request.GET.get("search")
+         if query:
+             queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
+             user_name = User.objects.get(username=query)
+             new_friend = User.objects.get(username=user_name)
 
-    def get(self,request,*args,**kwargs):
-        user_list = User.objects.all()
-        user_filter = UserFilter(request.GET, queryset=user_list)
-        serializer = UserCreateSerializer(user_filter)
-        return Response({'detail':serializer.data})
-
+             if operation == str(1):
+                 print("entered")
+                 Friend.make_friend(self.request.user,new_friend)
+             if operation == str(2):
+                 Friend.lose_friend(self.request.user,new_friend)
+         return queryset_list
 
 
 

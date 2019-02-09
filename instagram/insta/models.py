@@ -69,18 +69,24 @@ class Comment(models.Model):
 
     #created_date = models.DateTimeField(auto_now_add=True)
 
-# class Friend(models.Model):
-#     user = models.ManyToManyField(User)
-#     current_user = models.ForeignKey(User,null=True)
-#     @classmethod
-#     def make_friend(cls,current_user,new_friend):
-#         friend,created = cls.objects.get_or_create(current_user=current_user)
-#         friend.users.add(new_friend)
-#
-#     @classmethod
-#     def lose_friend(cls,current_user,new_friend):
-#         friend,created = cls.objects.get_or_create(current_user=current_user)
-#         friend.users.remove(new_friend)
+class Friend(models.Model):
+    user = models.ManyToManyField(User)
+    current_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='current',
+                                     null=True)
+    @classmethod
+    def make_friend(cls,current_user,new_friend):
+        print('hello')
+        if (new_friend !=current_user):
+            print("54")
+            friend,created = cls.objects.get_or_create(current_user=current_user)
+            friend.user.add(new_friend)
+            print(friend.user.all())
+
+    @classmethod
+    def lose_friend(cls,current_user,new_friend):
+        if (new_friend !=current_user):
+            friend,created = cls.objects.get_or_create(current_user=current_user)
+            friend.user.remove(new_friend)
 
 
 
