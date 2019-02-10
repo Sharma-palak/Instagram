@@ -8,9 +8,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import request
 from rest_framework.serializers import ValidationError
 
-from .models import (Post,Activity,Comment,Profile,Friend)
-
-
+#from .models import (Post,Activity,Comment,Friend)
+from .models import *
+from django.contrib.auth import get_user_model
 User=get_user_model()
 
 class LoginSerializer(serializers.Serializer):
@@ -126,9 +126,9 @@ class PostSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Profile
-        fields = ('id','image','bio','phone_no','name','user')
-        read_only_fields = ('user','name',)
+        model = User
+        fields = ('image','bio','phone_no','name',)
+        read_only_fields = ('name',)
 
 
 

@@ -4,37 +4,40 @@ from django.db import models
 # Create your models here.
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+# from django.contrib.auth.models import User
+# from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser
 
-class Profile(models.Model):
-    #owner = models.ForeignKey('auth.User', related_name='profiles', on_delete=models.CASCADE)
-    user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
-    name = models.CharField(max_length=250,blank=True)
-    image=models.ImageField(upload_to='profile_images',blank=True)
-    bio = models.TextField(max_length=500, blank=True)
-    phone_no =PhoneNumberField()
-    #birth_date = models.DateField(null=True,blank=True)
-    def __str__(self):
-        return self.user.username
-
-
-    @receiver(post_save, sender=User)
-    def create_profile(sender, instance, created, **kwargs):
-        if created:
-            Profile.objects.create(user=instance)
-
-    @receiver(post_save, sender=User)
-    def save_profile(sender, instance, **kwargs):
-        instance.profile.save()
-
-# class User(AbstractUser):
-#     #user = models.OneToOneField(settings.AUTH_USER_MODEL)
-#     name = models.CharField(max_length=250, blank=True)
+# class Profile(models.Model):
+#     #owner = models.ForeignKey('auth.User', related_name='profiles', on_delete=models.CASCADE)
+#     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
+#     name = models.CharField(max_length=250,blank=True)
 #     image=models.ImageField(upload_to='profile_images',blank=True)
 #     bio = models.TextField(max_length=500, blank=True)
-#     phone_no =models.CharField(max_length=10,blank=True)
+#     phone_no =PhoneNumberField()
+#     #birth_date = models.DateField(null=True,blank=True)
+#     def __str__(self):
+#         return self.user.username
+#
+#
+#     @receiver(post_save, sender=User)
+#     def create_profile(sender, instance, created, **kwargs):
+#         if created:
+#             Profile.objects.create(user=instance)
+#
+#     @receiver(post_save, sender=User)
+#     def save_profile(sender, instance, **kwargs):
+#         instance.profile.save()
+
+class User(AbstractUser):
+    #user = models.OneToOneField(settings.AUTH_USER_MODEL)
+    name = models.CharField(max_length=250, blank=True)
+    image=models.ImageField(upload_to='profile_images',blank=True)
+    bio = models.TextField(max_length=500, blank=True)
+    phone_no = PhoneNumberField(blank=True)
+    def __str__(self):
+        return self.username
 
 class Post(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)

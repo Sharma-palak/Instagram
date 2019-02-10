@@ -189,5 +189,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'palak2906lucknow@gmail.com'
 EMAIL_HOST_PASSWORD = '8840936579palak'
 EMAIL_PORT = 587
+AUTH_USER_MODEL = "insta.User"
 APPEND_SLASH=False
-#AUTH_USER_MODEL = 'insta.User'

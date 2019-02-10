@@ -14,6 +14,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'post', views.PostView)
 router.register(r'profile',views.ProfileView)
+router.register(r'comment_edit',views.Comment_Edit)
 
 urlpatterns = [
     path('',include(router.urls)),

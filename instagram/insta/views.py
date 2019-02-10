@@ -3,6 +3,8 @@ from rest_framework import generics
 from django.shortcuts import get_object_or_404
 #from .filters import UserFilter
 from django.db.models import Q
+from django.contrib.auth import get_user_model
+User=get_user_model()
 from rest_framework import filters
 from .serializers import *
 from django.shortcuts import redirect
@@ -20,7 +22,7 @@ from .tokens import account_activation_token
 from django.core.mail import send_mail
 from .models import *
 from django.http import Http404
-from .permissions import IsOwnerOrReadOnly,IsPostOrReadOnly
+from .permissions import IsPostOrReadOnly,IsCommentOrReadOnly
 from rest_framework import viewsets
 from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_201_CREATED
@@ -28,8 +30,8 @@ from rest_framework.views import APIView
 from rest_framework import generics,permissions
 # from .import models
 # from .serializers import *
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
+#from django.contrib.auth.models import User
+#from django.contrib.auth import get_user_model
 
 from rest_framework.decorators import action
 #User=get_user_model()
@@ -143,8 +145,14 @@ class PostView(viewsets.ModelViewSet):
 
 class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
-    queryset = Profile.objects.all()
-    permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
+    queryset = User.objects.all()
+    permission_classes = (permissions.IsAuthenticated,)
+    lookup_field = 'id'
+    def perform_update(self, serializer):
+        user_obj = self.request.user.username
+        print(user_obj)
+        serializer.save(name=user_obj)
+
     #parser_classes = (MultiPartParser, FormParser, JSONParser, FileUploadParser)
     # def perform_create(self, serializer):
     #     user_obj = self.request.user.username
@@ -211,6 +219,15 @@ class CommentView(APIView):
             serializer.save(user=request.user,post=post)
             return Response({'detail':serializer.data})
 
+class Comment_Edit(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+    permission_classes = (permissions.IsAuthenticated,IsCommentOrReadOnly)
+
+    def perform_create(self, serializer):
+        user_obj = self.request.user.username
+        print(user_obj)
+        serializer.save(user=self.request.user)
 
 class Add_Friend(generics.ListAPIView):
     queryset = User.objects.all()
