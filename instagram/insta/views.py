@@ -206,12 +206,6 @@ class CommentView(APIView):
     def post(self,request,*args,**kwargs):
         post_id = self.kwargs['postid']
         post = Post.objects.get(id=post_id)
-
-        # try:
-        #    comment = Comment.objects.get(user=self.request.user, id=post_id)
-        # except (Comment.DoesNotExist):
-        #     comment = None
-        # if comment is None:
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user,post=post)
@@ -238,7 +232,22 @@ class Add_Friend(generics.ListAPIView):
                  Friend.make_friend(self.request.user,new_friend)
              if operation == str(2):
                  Friend.lose_friend(self.request.user,new_friend)
+
          return queryset_list
+
+class Friend_List(generics.ListAPIView):
+    queryset = Friend.objects.all()
+    serializer_class = FriendSerializer
+    def get(self,*args,**kwargs):
+        current_id = self.kwargs['userid']
+        list = Friend.objects.filter(current_user=current_id)
+        print(list)
+        serializer = FriendSerializer(list,many=True)
+
+        return Response({'detail':serializer.data})
+
+
+
 
 
 

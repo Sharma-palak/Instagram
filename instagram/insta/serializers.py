@@ -144,12 +144,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('user','post','text')
-        read_only_fields = ('user','post')
+        fields = ('id','user','post','text')
+        read_only_fields = ('user','post','id',)
 
-# class FriendSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Friend
-#         fields = ('user','current_user')
-#         read_only_fields = ('current_user')
+class FriendSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Friend
+        fields = ('user','current_user')
+        read_only_fields = ('current_user','user')
 

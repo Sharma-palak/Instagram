@@ -87,9 +87,10 @@ class Friend(models.Model):
         if (new_friend !=current_user):
             friend,created = cls.objects.get_or_create(current_user=current_user)
             friend.user.remove(new_friend)
+            print(friend.user.all())
 
-
-
+    def __str__(self):
+        return("%s"%(self.current_user))
 
 
 
