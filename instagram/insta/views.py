@@ -141,7 +141,30 @@ class PostView(viewsets.ModelViewSet):
         user_obj = self.request.user.username
         print(user_obj)
         serializer.save(user=self.request.user,name=user_obj)
+    def get_queryset(self):
+        if self.action == 'users_Post':
+            return Post.objects.filter(user=self.request.user)
+        else:
+            return Post.objects.all()
+    # def list(self,request,*args,**kwargs):
+    #     k=Post.objects.all()
+    #     list=[]
+    #     for j in k:
+    #         print(j.user.id)
+    #         post_user=User.objects.filter(id=j.user.id)
+    #         print(post_user)
+    #         list.append(post_user)
+    #     seria = ProfileSerializer(list,many=True)
+    #     serializer=PostSerializer(k,many=True)
+    #     return Response({'detail':serializer.data})
 
+
+
+    @action(methods=['GET',],detail=False)
+    def users_Post(self,*args,**kwargs):
+        list = Post.objects.filter(user = self.request.user)
+        serializer = PostSerializer(list,many=True)
+        return Response({'detail':serializer.data})
 
 class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
@@ -203,8 +226,8 @@ class CommentView(APIView):
     serializer_class = CommentSerializer
 
     def get(self,request,*args,**kwargs):
-        post_id = self.kwargs['postid']
-        post = Post.objects.get(id=post_id)
+        postid = self.kwargs['postid']
+        post = Post.objects.get(id=postid)
 
         comment = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comment,many=True)
@@ -212,11 +235,11 @@ class CommentView(APIView):
         return Response({'detail':serializer.data})
 
     def post(self,request,*args,**kwargs):
-        post_id = self.kwargs['postid']
-        post = Post.objects.get(id=post_id)
+        postid = self.kwargs['postid']
+        post = Post.objects.get(id=postid)
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user,post=post)
+            serializer.save(user=request.user,post=post,name=request.user.username)
             return Response({'detail':serializer.data})
 
 class Comment_Edit(viewsets.ModelViewSet):
@@ -227,30 +250,102 @@ class Comment_Edit(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user_obj = self.request.user.username
         print(user_obj)
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user,name=user_obj)
 
-class Add_Friend(generics.ListAPIView):
-    queryset = User.objects.all()
+# class Add_Friend(generics.ListAPIView):
+#     queryset = User.objects.all()
+#     serializer_class = UserCreateSerializer
+#     filter_backends = (filters.SearchFilter,)
+#     search_fields = ('username',)
+#     def get_queryset(self,*args,**kwargs):
+#          operation = self.kwargs['operation']
+#          print(type(operation))
+#          queryset_list = User.objects.all()
+#          query = self.request.GET.get("search")
+#          if query:
+#              queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
+#              user_name = User.objects.get(username=query)
+#              new_friend = User.objects.get(username=user_name)
+#
+#              if operation == str(1):
+#                  print("entered")
+#                  Friend.make_friend(self.request.user,new_friend)
+#              if operation == str(2):
+#                  Friend.lose_friend(self.request.user,new_friend)
+#
+#          return queryset_list
+class Add_Friend(viewsets.ModelViewSet):
     serializer_class = UserCreateSerializer
+    queryset = User.objects.all()
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     def get_queryset(self,*args,**kwargs):
-         operation = self.kwargs['operation']
-         print(type(operation))
-         queryset_list = User.objects.all()
-         query = self.request.GET.get("search")
-         if query:
-             queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
-             user_name = User.objects.get(username=query)
-             new_friend = User.objects.get(username=user_name)
+        queryset_list = User.objects.all()
+        query = self.request.GET.get("search")
+        if query :
+            queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
+        return queryset_list
 
-             if operation == str(1):
-                 print("entered")
-                 Friend.make_friend(self.request.user,new_friend)
-             if operation == str(2):
-                 Friend.lose_friend(self.request.user,new_friend)
+    def retrieve(self,request,*args,**kwargs):
+        query = self.request.GET.get("search")
+        p=User.objects.get(pk=kwargs['pk'],username__icontains=query)
+        #new_friend=User.objects.filter(username=p)
+        friend,created=Friend.objects.get_or_create(current_user=self.request.user)
+        if (p in friend.user.all()):
+            friend.user.remove(p)
+            print(friend.user.all())
+            return Response({'detail':'removed'})
+        elif(p != self.request.user):
+            friend.user.add(p)
+            print(friend.user.all())
+            return Response({'detail':'added'})
+        elif (p==self.request.user):
+            return Response({'detail':'cannot add or remove'})
+    @action(methods=['GET'],detail=False)
+    def list_friend(self,request,*args,**kwargs):
+        friend_list=Friend.objects.filter(current_user=self.request.user)
+        list=[]
+        for i in friend_list:
+            for j in i.user.all():
+                for k in User.objects.filter(username=j):
+                    print(k)
+                    list.append(k)
+        serializer = ProfileSerializer(list,many=True)
+        return Response({'detail':serializer.data})
 
-         return queryset_list
+        # if query:
+        #      queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
+        #      user_name = User.objects.get(username=query)
+        #      new_friend = User.objects.get(username=user_name)
+        #      if self.action == 'add':
+        #          friend= Friend.objects.get_or_create(current_user=self.request.user)
+        #          friend.user.add(new_friend)
+        #          print('hello')
+        #          print(friend.user.all())
+        #      if self.action == 'remove':
+        #          friend= Friend.objects.get_or_create(current_user=self.request.user)
+        #          friend.user.remove(new_friend)
+        #
+        # return queryset_list
+
+
+
+
+
+    # @action(methods=['GET'], detail=False)
+    # def add(self,*args,**kwargs):
+    #     query=self.get_queryset()
+    #     print(query)
+    #     print(Friend.objects.get(current_user=self.request.user))
+    #     return Response({'detail':"added"})
+
+
+
+
+
+
+
+
 
 class Friend_List(generics.ListAPIView):
     queryset = Friend.objects.all()

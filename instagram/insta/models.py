@@ -24,7 +24,7 @@ from django.contrib.auth.models import AbstractUser
 #     @receiver(post_save, sender=User)
 #     def create_profile(sender, instance, created, **kwargs):
 #         if created:
-#             Profile.objects.create(user=instance)
+#             Profile.objectscreate(user=instance)
 #
 #     @receiver(post_save, sender=User)
 #     def save_profile(sender, instance, **kwargs):
@@ -63,34 +63,39 @@ class Activity(models.Model):
     def __str__(self):
         return (self.post.id)
 
+
 class Comment(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
     text = models.TextField(max_length=500, blank=True,null=True)
+    name = models.CharField(max_length=250,blank=True)
+
     def __str__(self):
         return("%s post.id %s"%(self.post.id,self.text))
 
     #created_date = models.DateTimeField(auto_now_add=True)
 
+
 class Friend(models.Model):
     user = models.ManyToManyField(User)
     current_user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='current',
                                      null=True)
-    @classmethod
-    def make_friend(cls,current_user,new_friend):
-        print('hello')
-        if (new_friend !=current_user):
-            print("54")
-            friend,created = cls.objects.get_or_create(current_user=current_user)
-            friend.user.add(new_friend)
-            print(friend.user.all())
-
-    @classmethod
-    def lose_friend(cls,current_user,new_friend):
-        if (new_friend !=current_user):
-            friend,created = cls.objects.get_or_create(current_user=current_user)
-            friend.user.remove(new_friend)
-            print(friend.user.all())
+    # @classmethod
+    # def make_friend(cls,current_user,new_friend):
+    #     print('hello')
+    #     if (new_friend !=current_user):
+    #         print("54")
+    #         friend,created = cls.objects.get_or_create(current_user=current_user)
+    #         friend.user.add(new_friend)
+    #         print("hello")
+    #         print(friend.user.all())
+    #
+    # @classmethod
+    # def lose_friend(cls,current_user,new_friend):
+    #     if (new_friend !=current_user):
+    #         friend,created = cls.objects.get_or_create(current_user=current_user)
+    #         friend.user.remove(new_friend)
+    #         print(friend.user.all())
 
     def __str__(self):
         return("%s"%(self.current_user))

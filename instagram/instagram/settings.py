@@ -25,12 +25,7 @@ SECRET_KEY = 'bi31n$+^ug4s14=+9==fisa(*3125v_6-bve6i+@gemo@8g+n5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['127.0.0.1','692f2488.ngrok.io']
-#'e4fac40d.ngrok.io'f0d.ngrok.io
-#'127.0.0.1','0834330a.ngrok.io'
-# Application definition
-#http://192.168.100.133:8000/post/
+ALLOWED_HOSTS = ['127.0.0.1','c02d712f.ngrok.io']
 
 INSTALLED_APPS = [
     'rest_framework',
@@ -183,6 +178,9 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': None,
 
 }
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'

@@ -127,8 +127,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('image','bio','phone_no','name',)
-        read_only_fields = ('name',)
+        fields = ('id','image','bio','phone_no','name',)
+        read_only_fields = ('name','id')
 
 
 
@@ -144,8 +144,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id','user','post','text')
-        read_only_fields = ('user','post','id',)
+        fields = ('id','user','post','text','name')
+        read_only_fields = ('user','post','id','name')
 
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
