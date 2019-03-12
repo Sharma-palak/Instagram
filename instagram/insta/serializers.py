@@ -58,11 +58,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
     username=serializers.CharField()
     first_name=serializers.CharField()
     last_name=serializers.CharField()
+
     class Meta:
         model = User
         write_only_fields = ('password',)
-        read_only_fields = ('id',)
-        fields = ['id', 'username', 'password', 'email', 'first_name', 'last_name',]
+        read_only_fields = ['id']
+        fields = ['id', 'username', 'password', 'email', 'first_name', 'last_name']
 
         extra_kwargs = {
             "password": {"write_only": True},
@@ -108,29 +109,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
       user.save()
       return user
 
-
-
-
-
-
-
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = ('id','title','caption','picture','files','date_created','name','user')
-        read_only_fields = ('id','name','user')
-
-
-
-
 class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id','image','bio','phone_no','name',)
-        read_only_fields = ('name','id')
+        fields = ('id','image','bio','phone_no','username')
+        read_only_fields = ('id','username')
 
+class PostSerializer(serializers.ModelSerializer):
+     p = serializers.SerializerMethodField()
+     like =serializers.SerializerMethodField()
+     class Meta:
+        model = Post
+        fields = ('id','title','caption','picture','files','date_created','name','user','p','like')
+        read_only_fields = ('id','name','user','p','like')
 
+     def get_p(self, obj):
+         k=User.objects.get(id=obj.user.id)
+         print(k)
+         seria=ProfileSerializer(k)
+         return (seria.data)
+     def get_like(self,obj):
+         post = Post.objects.get(id=obj.id)
+         result= Activity.objects.filter(post=post).count()
+         return (result)
 
 class LikeSerializer(serializers.ModelSerializer):
 

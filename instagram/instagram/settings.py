@@ -25,7 +25,7 @@ SECRET_KEY = 'bi31n$+^ug4s14=+9==fisa(*3125v_6-bve6i+@gemo@8g+n5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1','c02d712f.ngrok.io']
+ALLOWED_HOSTS = ['127.0.0.1','1100cda9.ngrok.io']
 
 INSTALLED_APPS = [
     'rest_framework',
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'phonenumber_field',
+    'phonenumber_field',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
@@ -170,8 +170,7 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
-
-    'JWT_ALLOW_REFRESH': False,
+    'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
@@ -185,7 +184,7 @@ STATICFILES_DIRS = (
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'palak2906lucknow@gmail.com'
-EMAIL_HOST_PASSWORD = '8840936579palak'
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 AUTH_USER_MODEL = "insta.User"
 APPEND_SLASH=False

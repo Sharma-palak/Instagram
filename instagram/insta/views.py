@@ -22,7 +22,7 @@ from .tokens import account_activation_token
 from django.core.mail import send_mail
 from .models import *
 from django.http import Http404
-from .permissions import IsPostOrReadOnly,IsCommentOrReadOnly
+from .permissions import IsPostOrReadOnly,IsCommentOrReadOnly,IsOwnerOrReadOnly
 from rest_framework import viewsets
 from rest_framework.status import HTTP_200_OK,HTTP_400_BAD_REQUEST
 from rest_framework.status import HTTP_201_CREATED
@@ -90,6 +90,8 @@ class UserCreateAPIView(generics.CreateAPIView):
           }
         #que=User.objects.get(id=pk)
         serializer = UserCreateSerializer(data=temp_data)
+
+
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             current_site = get_current_site(request)
@@ -150,12 +152,15 @@ class PostView(viewsets.ModelViewSet):
     #     k=Post.objects.all()
     #     list=[]
     #     for j in k:
+    #         print("hii")
     #         print(j.user.id)
-    #         post_user=User.objects.filter(id=j.user.id)
-    #         print(post_user)
-    #         list.append(post_user)
-    #     seria = ProfileSerializer(list,many=True)
-    #     serializer=PostSerializer(k,many=True)
+    #         post_user=Friend.objects.filter(current_user=request.user.id)
+    #         if(post_user.user.filter(id=j.user.id)):
+    #             print(post_user)
+    #             p= Post.objects.filter(user=j.user.id)
+    #             list.append(p)
+    #     serializer=PostSerializer(list,many=True)
+    #     print(serializer.data)
     #     return Response({'detail':serializer.data})
 
 
@@ -169,7 +174,7 @@ class PostView(viewsets.ModelViewSet):
 class ProfileView(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
     lookup_field = 'id'
     def perform_update(self, serializer):
         user_obj = self.request.user.username
@@ -275,15 +280,15 @@ class Comment_Edit(viewsets.ModelViewSet):
 #
 #          return queryset_list
 class Add_Friend(viewsets.ModelViewSet):
-    serializer_class = UserCreateSerializer
+    serializer_class = ProfileSerializer
     queryset = User.objects.all()
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     def get_queryset(self,*args,**kwargs):
-        queryset_list = User.objects.all()
+        queryset_list = User.objects.all().exclude(id=self.request.user.id)
         query = self.request.GET.get("search")
         if query :
-            queryset_list = queryset_list.filter(Q(username__icontains=query)).distinct()
+            queryset_list = queryset_list.filter(Q(username__startswith=query)).distinct()
         return queryset_list
 
     def retrieve(self,request,*args,**kwargs):
@@ -358,6 +363,15 @@ class Friend_List(generics.ListAPIView):
 
         return Response({'detail':serializer.data})
 
+class DeleteAccount(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    def destroy(self, request, *args, **kwargs):
+        q=User.objects.filter(id=self.request.user.id)
+        q.delete()
+        serializer=UserCreateSerializer(q)
+        return Response({'detail':'your account is deleted successfully'})
 
 
 

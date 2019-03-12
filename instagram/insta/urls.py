@@ -14,6 +14,7 @@ router.register(r'post', views.PostView)
 router.register(r'profile',views.ProfileView)
 router.register(r'comment_edit',views.Comment_Edit)
 router.register(r'add_friend',views.Add_Friend,basename='add_friend')
+router.register(r'delete',views.DeleteAccount)
 
 urlpatterns = [
     path('',include(router.urls)),

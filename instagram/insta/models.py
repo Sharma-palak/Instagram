@@ -32,7 +32,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     #user = models.OneToOneField(settings.AUTH_USER_MODEL)
-    name = models.CharField(max_length=250, blank=True)
+    #name = models.CharField(max_length=250, blank=True)
     image=models.ImageField(upload_to='profile_images',blank=True)
     bio = models.TextField(max_length=500, blank=True)
     phone_no = PhoneNumberField(blank=True)
@@ -59,7 +59,6 @@ class Activity(models.Model):
     post = models.ForeignKey(Post,on_delete=models.CASCADE)
     like = models.BooleanField(default=False)
     like_count = models.PositiveIntegerField(default=0)
-
     def __str__(self):
         return (self.post.id)
 
