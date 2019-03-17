@@ -99,7 +99,11 @@ class Friend(models.Model):
     def __str__(self):
         return("%s"%(self.current_user))
 
-
+class otp_generate(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    otp=models.PositiveIntegerField(default=0)
+    def __str__(self):
+        return ("%s"%(self.otp))
 
 
 

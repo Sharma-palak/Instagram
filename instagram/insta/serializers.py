@@ -155,3 +155,9 @@ class FriendSerializer(serializers.ModelSerializer):
         fields = ('user','current_user')
         read_only_fields = ('current_user','user')
 
+class OtpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model= otp_generate
+        fields = ('user','otp')
+        read_only_fields= ['user']

@@ -21,6 +21,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from .tokens import account_activation_token
 from django.core.mail import send_mail
 from .models import *
+import random
 from django.http import Http404
 from .permissions import IsPostOrReadOnly,IsCommentOrReadOnly,IsOwnerOrReadOnly
 from rest_framework import viewsets
@@ -68,7 +69,7 @@ class LogoutView(APIView):
 
 
 
-
+'''
 class UserCreateAPIView(generics.CreateAPIView):
     permission_classes=(permissions.AllowAny,)
     serializer_class=UserCreateSerializer
@@ -130,6 +131,8 @@ class Activate(APIView):
         else:
             messages.error(request, "Activation Email Link is Invalid.Please try again!!")
             return redirect('register')
+
+'''
 
 
 
@@ -375,7 +378,96 @@ class DeleteAccount(viewsets.ModelViewSet):
 
 
 
+class UserCreateAPIView(generics.CreateAPIView):
+    permission_classes=(permissions.AllowAny,)
+    serializer_class=UserCreateSerializer
+    queryset= User.objects.all()
+    model = User
 
+    def post(self, request, *args, **kwargs,):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        email = request.data.get('email')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+        temp_data = {
+              'username': username,
+              'password': password,
+              'email': email,
+              'first_name': first_name,
+              'last_name': last_name,
+          }
+        #que=User.objects.get(id=pk)
+        serializer = UserCreateSerializer(data=temp_data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.save()
+            #current_site = get_current_site(request)
+            otp=random.randint(999,9999)
+            otp_key=otp_generate.objects.create(user=user,otp=otp)
+            otp_key.save()
+            print(otp_key.otp)
+            print(otp_key.user)
+            from_mail = EMAIL_HOST_USER
+            mail_subject = 'Activate your instagram account.'
+            message = render_to_string('insta/action.html', {
+                'user': user,
+                #'domain': current_site.domain,
+                'otp':otp_key.otp,
+            })
+            to_email = [user.email]
+            send_mail(mail_subject, message, from_mail, to_email, fail_silently=False)
+            messages.success(request, 'Confirm your email to complete registering with Instagram.')
+            return Response({'message': 'Please confirm your email address to complete the registration',},
+                            status=status.HTTP_201_CREATED)
+        return Response("bad attempt", status=status.HTTP_400_BAD_REQUEST)
+
+'''
+class Activate(APIView):
+    permission_classes = (permissions.AllowAny,)
+    def get(self,request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            django_login(request, user)
+            messages.success(request,"Email Verified")
+            return Response({'detail':'email verified'})
+        else:
+            messages.error(request, "Activation Email Link is Invalid.Please try again!!")
+            return redirect('register')
+'''
+class otp_verify(APIView):
+    permission_classes = (permissions.AllowAny,)
+    queryset = otp_generate.objects.all()
+    serializer_class = OtpSerializer
+
+    def post(self,request,id,*args,**kwargs):
+        otp=request.data.get('otp')
+        u=User.objects.filter(id=id)
+        print(u)
+        otp_object=otp_generate.objects.filter(user=u[0])
+        print(otp_object)
+        print(type(otp))
+        try:
+            otp_object[0].otp==int(otp)
+        except IndexError:
+            return Response({'detail':'incorrect otp'})
+        u.is_active=True
+        otp_object[0].delete()
+        return Response({'detail':'verified'})
+
+
+        # if(otp_object[0].otp==int(otp)):
+        #     u.is_active=True
+        #     u.save()
+        #     otp_object[0].delete()
+        #     return Response({'detail':'verified'})
+        # else:
+        #     return Response({'detail':'Incorrect otp'})
 
 
 

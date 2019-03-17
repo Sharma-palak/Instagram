@@ -12,7 +12,7 @@ admin.site.register(Post)
 admin.site.register(Activity)
 admin.site.register(Comment)
 admin.site.register(Friend)
-
+admin.site.register(otp_generate)
 
 '''
   current_site = get_current_site(request)
