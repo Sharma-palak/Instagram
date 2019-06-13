@@ -187,4 +187,4 @@ EMAIL_HOST_USER = 'palak2906lucknow@gmail.com'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 AUTH_USER_MODEL = "insta.User"
-APPEND_SLASH=False
+#APPEND_SLASH=False
