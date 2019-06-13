@@ -24,9 +24,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'bi31n$+^ug4s14=+9==fisa(*3125v_6-bve6i+@gemo@8g+n5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1','40e84c56.ngrok.io']
-
+DEBUG = False
+#ALLOWED_HOSTS = ['127.0.0.1','40e84c56.ngrok.io']
+#ALLOWED_HOSTS=[localhost,.herokuapp.com]
+ALLOWED_HOSTS=['*']
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'instagram.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
+#
 DATABASES = {
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -137,7 +138,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_URL = '/static/'
 
 MEDIA_URL='/media/'
@@ -177,9 +178,16 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': None,
 
 }
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+#STATICFILES_DIRS = (
+#    os.path.join(BASE_DIR, 'static'),
+#)
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+   os.path.join(PROJECT_ROOT, 'static'),
 )
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
@@ -187,4 +195,4 @@ EMAIL_HOST_USER = 'palak2906lucknow@gmail.com'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 AUTH_USER_MODEL = "insta.User"
-#APPEND_SLASH=False
+APPEND_SLASH=False
