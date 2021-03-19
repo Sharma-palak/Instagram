@@ -4,7 +4,7 @@ chardet==3.0.4
 Django==2.2.2
 django-filter==2.1.0
 django-phonenumber-field==3.0.1
-djangorestframework==3.9.4
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 idna==2.8
 phonenumbers==8.10.13
